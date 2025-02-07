@@ -49,7 +49,7 @@ Start-Sleep 10
 (New-Object System.Net.WebClient).DownloadFile("https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/QualysCloudAgent.exe", "$env:TEMP/QualysCloudAgent.exe")
 $arguments = "CustomerId={5e178b8d-acec-d296-8055-4a60ceddc5fd} ActivationId={dc068396-6b29-4876-9ac3-9130be06350f} WebServiceUri=https://qagpublic.qg1.apps.qualys.in/CloudAgent/"
 function InstallQualysAgent {
-Start-Process -FilePath "$env:TEMP\qualysCloudAgent.exe" -ArgumentList $arguments -passthru
+Start-Process -FilePath "$env:TEMP\qualysCloudAgent.exe" $arguments
 }
 InstallQualysAgent
 Start-Sleep 10
