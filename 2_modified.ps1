@@ -42,9 +42,6 @@ Configuration superbank_cis_windows10_v3 {
     Pop-Location
     New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\RemovableStorageDevices" -Name "Deny_All" -Value "1" -PropertyType "Dword"
 
-    # Disable Windows 11 update
-    New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "SvOfferDeclined" -Value "1646085160366" -PropertyType "Qword"
-
     # Disable Login MsAccount
     Push-Location
     Set-Location HKLM:
@@ -107,18 +104,7 @@ Start-Sleep 5
     New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI" -Name "DisablePasswordReveal" -Value "1" -PropertyType "Dword"
     Pop-Location
 Start-Sleep 5
-    # Disable Windows 11 update
-    Push-Location
-    Set-Location HKLM:
-    if (-not (Test-Path ".\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate")) {
-        New-Item -Path ".\SOFTWARE\Policies\Microsoft\Windows" -Name "WindowsUpdate"
-    }
-    if (-not (Test-Path ".\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU")) {
-        New-Item -Path ".\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "AU"
-    }
-    New-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "NoAutoUpdate" -Value "1" -PropertyType "Dword"
-    Pop-Location
-Start-Sleep 5
+
     # Disable Windows Experience Screen
     Push-Location
     Set-Location HKCU:
