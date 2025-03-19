@@ -3,21 +3,20 @@ New-Item -Path 'C:\installer' -ItemType Directory -Force
 
 # Download necessary files
 $downloads = @{
-    "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/standardapps.zip" = "C:/installer/standardapps.zip"
     "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/winscript/ZoomMeetingsGlobalPolicySuperbank.reg" = "C:/installer/ZoomMeetingsGlobalPolicySuperbank.reg"
     "https://zoom.us/client/latest/ZoomInstallerFull.msi?archType=x64" = "C:/installer/zoom.msi"
     "https://github.com/pritunl/pritunl-client-electron/releases/download/1.3.3709.64/Pritunl.exe" = "C:/installer/pritunl.exe"
     "https://www.7-zip.org/a/7z2301-x64.msi" = "C:/installer/7zip.msi"
     "https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise64.msi" = "C:/installer/chrome.msi"
     "https://slack.com/ssb/download-win64-msi" = "C:/installer/slack.msi"
+    "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/user.bat" = "C:/installer/user.bat"},
+    "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/run.ps1" = "C:/installer/run.ps1"}
 }
 Start-Sleep 10
 foreach ($url in $downloads.Keys) {
     Invoke-WebRequest -Uri $url -OutFile $downloads[$url]
 }
 
-# Extract standard apps archive
-Expand-Archive -Path "C:/installer/standardapps.zip" -DestinationPath "C:/installer"
 cd C:\installer
 # Install MSI packages
 $msiFiles = @{
@@ -34,6 +33,7 @@ foreach ($msi in $msiFiles.Keys) {
 
 # Move user.bat to startup folder
 Move-Item -Path "C:\installer\user.bat" -Destination "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\"
+Move-Item -Path "C:\installer\run.ps1" -Destination "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\"
 
 # Import Zoom global policy registry
 reg import "C:/installer/ZoomMeetingsGlobalPolicySuperbank.reg"
