@@ -61,35 +61,35 @@ Read-Host -Prompt "Apps Installed! Press any key to continue"
 # INSTALL FORTICLIENT
 #====================================================================================#
 
-# Bypass SSL validation
-[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-[System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
+# # Bypass SSL validation
+# [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+# [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
 
-# Define variables
-$URL = "https://ztnavpn.cen.super-id.net:10443/installers/Default/collection-agent/msi/x64/FortiClient.msi"
-$Path = "C:\Windows\Temp\FortiClient.msi"
+# # Define variables
+# $URL = "https://ztnavpn.cen.super-id.net:10443/installers/Default/collection-agent/msi/x64/FortiClient.msi"
+# $Path = "C:\Windows\Temp\FortiClient.msi"
 
-# Download the file
-$webclient = New-Object System.Net.WebClient
-try {
-    $webclient.DownloadFile($URL, $Path)
-    Write-Host "Download successful: $Path"
-} catch {
-    Write-Host "Error downloading FortiClient: $_"
-    Read-Host "Press Enter to exit"
-    exit 1
-}
+# # Download the file
+# $webclient = New-Object System.Net.WebClient
+# try {
+#     $webclient.DownloadFile($URL, $Path)
+#     Write-Host "Download successful: $Path"
+# } catch {
+#     Write-Host "Error downloading FortiClient: $_"
+#     Read-Host "Press Enter to exit"
+#     exit 1
+# }
 
-# Install FortiClient silently
-if (Test-Path $Path) {
-    Write-Host "Starting FortiClient installation..."
-    Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$Path`" /quiet /norestart" -Verb RunAs -Wait
-    Write-Host "FortiClient installation completed."
-} else {
-    Write-Host "Installation file not found: $Path"
-    Read-Host "Press Enter to exit"
-    exit 1
-}
+# # Install FortiClient silently
+# if (Test-Path $Path) {
+#     Write-Host "Starting FortiClient installation..."
+#     Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$Path`" /quiet /norestart" -Verb RunAs -Wait
+#     Write-Host "FortiClient installation completed."
+# } else {
+#     Write-Host "Installation file not found: $Path"
+#     Read-Host "Press Enter to exit"
+#     exit 1
+# }
 
 
 #====================================================================================#
