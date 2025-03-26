@@ -5,7 +5,6 @@ New-Item -Path 'C:\installer' -ItemType Directory -Force
 $downloads = @{
     "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/winscript/ZoomMeetingsGlobalPolicySuperbank.reg" = "C:/installer/ZoomMeetingsGlobalPolicySuperbank.reg"
     "https://zoom.us/client/latest/ZoomInstallerFull.msi?archType=x64" = "C:/installer/zoom.msi"
-    "https://github.com/pritunl/pritunl-client-electron/releases/download/1.3.3709.64/Pritunl.exe" = "C:/installer/pritunl.exe"
     "https://www.7-zip.org/a/7z2301-x64.msi" = "C:/installer/7zip.msi"
     "https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise64.msi" = "C:/installer/chrome.msi"
     "https://slack.com/ssb/download-win64-msi" = "C:/installer/slack.msi"
@@ -38,9 +37,6 @@ Move-Item -Path "C:\installer\run.ps1" -Destination "C:\ProgramData\Microsoft\Wi
 # Import Zoom global policy registry
 reg import "C:/installer/ZoomMeetingsGlobalPolicySuperbank.reg"
 
-# Install Pritunl client
-Start-Process -FilePath "C:\installer\pritunl.exe" -Verb runAs -ArgumentList '/R /VERYSILENT'
-Start-Sleep 10
 # Install Cisco Secure Endpoint
 Start-Process -FilePath "C:\installer\amp_protect.exe" -Verb runAs -ArgumentList '/R /S'
 Start-Sleep 10
