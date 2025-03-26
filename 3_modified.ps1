@@ -61,6 +61,49 @@ Start-Sleep 15
 # Prompt for completion
 Read-Host -Prompt "Apps Installed! Press any key to continue"
 
+#====================================================================================#
+# CHECKING APP INSTALLATION FOLDERS AND RELATED SERVICES BEFORE INSTALLING FORCEPOINT
+#====================================================================================#
+Write-Output "WAITING IF ANY DELAYED PROCESS"
+Start-Sleep 30
+$CiscoInstallPath = "C:\Program Files\Cisco\AMP"
+$QualysInstallPath = "C:\Program Files\Qualys\QualysAgent"
+$JumpcloudInstallPath = "C:\Program Files\JumpCloud"
+
+# Function to check if their service is running
+function Is-ServiceIsRunning {
+	$isCiscoInstalled = Test-Path $CiscoInstallPath
+	$isQualysInstalled = Test-Path $QualysInstallPath
+	$isJumpcloudInstalled = Test-Path $JumpcloudInstallPath
+    $isCiscoServiceRunning = Get-Service -Name "CiscoAMP" -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'}
+    $isQualysServiceRunning = Get-Service -Name "QualysAgent" -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'}
+    $isJumpcloudServiceRunning = Get-Service -Name "jumpcloud-agent" -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'}
+    return $isCiscoInstalled -and $isQualysInstalled -and $isJumpcloudInstalled -and $isCiscoServiceRunning -and $isQualysServiceRunning -and $isJumpcloudServiceRunning
+}
+
+#====================================================================================#
+# DOWNLOAD & INSTALL FORCEPOINT WHEN ALL APP NEEDED IS SUCCESSFULLY INSTALLED
+#====================================================================================#
+Write-Output "WAITING FOR DELAYED PROCESS"
+Start-Sleep 30
+if (Is-ServiceIsRunning){
+	Write-Output "CISCO | QUALYS | JUMPCLOUD PERFECTLY INSTALLED AND RUNNING. PROCEEDING TO INSTALL FORCEPOINT"
+	$urls = @(
+		@{url = "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/Bitglass-SmartEdge-Autoinstaller-x64-1.3.3.msi"; dest = "C:/Windows/TEMP/Bitglass-SmartEdge-Autoinstaller-x64-1.3.3.msi"},
+		@{url = "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/autoinstall.bat"; dest = "C:/Windows/TEMP/autoinstall.bat"}
+	)
+
+	# Download files
+	foreach ($item in $urls) {
+		Invoke-WebRequest -Uri $item.url -OutFile $item.dest
+	}
+
+	Start-Process -FilePath "C:/Windows/TEMP/autoinstall.bat" -Verb runAs
+	Start-Sleep -Seconds 5
+} else {
+	Write-Output "ONE OR MORE APPLICATION ARE NOT PROPERLY INSTALLED. ABORTING INSTALL FORCEPOINT"
+}
+
 # Install dotnet core runtime 8.0.11
 # Variables
 $installerUrl = "https://download.visualstudio.microsoft.com/download/pr/53e9e41c-b362-4598-9985-45f989518016/53c5e1919ba2fe23273f2abaff65595b/dotnet-runtime-8.0.11-win-x64.exe"
