@@ -8,8 +8,8 @@ $downloads = @{
     "https://www.7-zip.org/a/7z2301-x64.msi" = "C:/installer/7zip.msi"
     "https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise64.msi" = "C:/installer/chrome.msi"
     "https://slack.com/ssb/download-win64-msi" = "C:/installer/slack.msi"
-    "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/user.bat" = "C:/installer/user.bat"},
-    "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/run.ps1" = "C:/installer/run.ps1"}
+    "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/user.bat" = "C:/installer/user.bat"
+    "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/run.ps1" = "C:/installer/run.ps1"
 }
 Start-Sleep 10
 foreach ($url in $downloads.Keys) {
