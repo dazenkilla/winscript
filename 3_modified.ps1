@@ -37,9 +37,16 @@ Move-Item -Path "C:\installer\run.ps1" -Destination "C:\ProgramData\Microsoft\Wi
 # Import Zoom global policy registry
 reg import "C:/installer/ZoomMeetingsGlobalPolicySuperbank.reg"
 
-# Install Cisco Secure Endpoint
-Start-Process -FilePath "C:\installer\amp_protect.exe" -Verb runAs -ArgumentList '/R /S'
-Start-Sleep 10
+#====================================================================================#
+# INSTALL CISCO SECURE ENDPOINT PROTECTION
+#====================================================================================#
+Write-Output "CISCO SECURE ENDPOINT PROTECTION"
+(New-Object System.Net.WebClient).DownloadFile("https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/amp_Protect.exe", "$env:TEMP/amp_Protect.exe")
+function CiscoSecureEndpoint {
+Start-Process -FilePath "$env:TEMP\amp_Protect.exe" -ArgumentList '/R /S'
+}
+CiscoSecureEndpoint
+Start-Sleep 30
 
 # Install Qualys Cloud Agent
 (New-Object System.Net.WebClient).DownloadFile("https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/QualysCloudAgent.exe", "$env:TEMP/QualysCloudAgent.exe")
