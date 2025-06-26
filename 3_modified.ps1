@@ -111,82 +111,28 @@ Start-Sleep 15
 Read-Host -Prompt "Apps Installed! Press any key to continue"
 
 #====================================================================================#
-# INSTALL FORTICLIENT
-#====================================================================================#
-
-# # Bypass SSL validation
-# [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-# [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
-
-# # Define variables
-# $URL = "https://ztnavpn.cen.super-id.net:10443/installers/Default/collection-agent/msi/x64/FortiClient.msi"
-# $Path = "C:\Windows\Temp\FortiClient.msi"
-
-# # Download the file
-# $webclient = New-Object System.Net.WebClient
-# try {
-#     $webclient.DownloadFile($URL, $Path)
-#     Write-Host "Download successful: $Path"
-# } catch {
-#     Write-Host "Error downloading FortiClient: $_"
-#     Read-Host "Press Enter to exit"
-#     exit 1
-# }
-
-# # Install FortiClient silently
-# if (Test-Path $Path) {
-#     Write-Host "Starting FortiClient installation..."
-#     Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$Path`" /quiet /norestart" -Verb RunAs -Wait
-#     Write-Host "FortiClient installation completed."
-# } else {
-#     Write-Host "Installation file not found: $Path"
-#     Read-Host "Press Enter to exit"
-#     exit 1
-# }
-
-
-#====================================================================================#
-# CHECKING APP INSTALLATION FOLDERS AND RELATED SERVICES BEFORE INSTALLING FORCEPOINT
+# FORCEPOINT INSTALLER
 #====================================================================================#
 Write-Output "WAITING IF ANY DELAYED PROCESS"
 Start-Sleep 30
-$CiscoInstallPath = "C:\Program Files\Cisco\AMP"
-$QualysInstallPath = "C:\Program Files\Qualys\QualysAgent"
-$JumpcloudInstallPath = "C:\Program Files\JumpCloud"
 
-# Function to check if their service is running
-function Is-ServiceIsRunning {
-	$isCiscoInstalled = Test-Path $CiscoInstallPath
-	$isQualysInstalled = Test-Path $QualysInstallPath
-	$isJumpcloudInstalled = Test-Path $JumpcloudInstallPath
-    $isCiscoServiceRunning = Get-Service -Name "CiscoAMP" -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'}
-    $isQualysServiceRunning = Get-Service -Name "QualysAgent" -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'}
-    $isJumpcloudServiceRunning = Get-Service -Name "jumpcloud-agent" -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'}
-    return $isCiscoInstalled -and $isQualysInstalled -and $isJumpcloudInstalled -and $isCiscoServiceRunning -and $isQualysServiceRunning -and $isJumpcloudServiceRunning
+# Daftar file yang akan diunduh
+$urls = @(
+    @{url = "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/Bitglass-SmartEdge-Autoinstaller-x64-1.3.4.msi"; dest = "C:/Windows/TEMP/Bitglass-SmartEdge-Autoinstaller-x64-1.3.4.msi"},
+    @{url = "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/autoinstall.bat"; dest = "C:/Windows/TEMP/autoinstall.bat"}
+)
+
+# Download file
+foreach ($item in $urls) {
+    Write-Output "DOWNLOADING: $($item.url)"
+    Invoke-WebRequest -Uri $item.url -OutFile $item.dest
 }
 
-#====================================================================================#
-# DOWNLOAD & INSTALL FORCEPOINT WHEN ALL APP NEEDED IS SUCCESSFULLY INSTALLED
-#====================================================================================#
-Write-Output "WAITING FOR DELAYED PROCESS"
-Start-Sleep 30
-if (Is-ServiceIsRunning){
-	Write-Output "CISCO | QUALYS | JUMPCLOUD PERFECTLY INSTALLED AND RUNNING. PROCEEDING TO INSTALL FORCEPOINT"
-	$urls = @(
-		@{url = "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/Bitglass-SmartEdge-Autoinstaller-x64-1.3.3.msi"; dest = "C:/Windows/TEMP/Bitglass-SmartEdge-Autoinstaller-x64-1.3.3.msi"},
-		@{url = "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/autoinstall.bat"; dest = "C:/Windows/TEMP/autoinstall.bat"}
-	)
+# Jalankan file BAT untuk install Forcepoint
+Write-Output "INSTALLING FORCEPOINT..."
+Start-Process -FilePath "C:/Windows/TEMP/autoinstall.bat" -Verb runAs
+Start-Sleep -Seconds 5
 
-	# Download files
-	foreach ($item in $urls) {
-		Invoke-WebRequest -Uri $item.url -OutFile $item.dest
-	}
-
-	Start-Process -FilePath "C:/Windows/TEMP/autoinstall.bat" -Verb runAs
-	Start-Sleep -Seconds 5
-} else {
-	Write-Output "ONE OR MORE APPLICATION ARE NOT PROPERLY INSTALLED. ABORTING INSTALL FORCEPOINT"
-}
 
 # Install dotnet core runtime 8.0.11
 # Variables
