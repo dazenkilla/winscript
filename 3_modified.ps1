@@ -1,4 +1,45 @@
-﻿# Create installer directory
+#====================================================================================#
+# SETTING UP BIOS ADMIN PASSWORD
+#====================================================================================#
+Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Bypass -Force
+#Set BIOS Password
+# Check if DellBIOSProvider module is installed
+$moduleName = "DellBIOSProvider"
+$biosPasswordPath = "DellSmbios:\Security\AdminPassword"
+$lockoutPath = "DellSmbios:\Security\AdminSetupLockout"
+$strongPasswordPath = "DellSmbios:\Security\StrongPassword"
+$adminPassword = "R1d3r5m4n?"
+$lockout = "Enabled"
+$strong = "Enabled"
+
+# Function to install DellBIOSProvider module if not present
+function Install-DellBIOSProvider {
+    Write-Host "DellBIOSProvider module not found. Installing..."
+    Install-Module -Name $moduleName -Force -SkipPublisherCheck
+}
+
+# Check if module is installed, install if not
+if (-not (Get-Module -ListAvailable -Name $moduleName)) {
+    Install-DellBIOSProvider
+}
+
+# Import the module
+Import-Module -Name $moduleName -Force
+
+# Check if the BIOS AdminPassword is already set
+$biosPasswordSet = (Get-Item -Path $biosPasswordPath).CurrentValue
+if (-not $biosPasswordSet) {
+    # Set the BIOS AdminPassword if not set
+    Set-Item -Path $biosPasswordPath -Value $adminPassword
+	Set-Item -Path $lockoutPath -Value $lockout
+	Set-Item -Path $strongPasswordPath -Value $strong
+    Write-Host "BIOS AdminPassword has been set."
+} else {
+    Write-Host "BIOS AdminPassword is already set."
+}
+
+ 
+ # Create installer directory
 New-Item -Path 'C:\installer' -ItemType Directory -Force
 
 # Download necessary files
