@@ -13,7 +13,8 @@ $downloads = @{
 }
 Start-Sleep 10
 foreach ($url in $downloads.Keys) {
-    Invoke-WebRequest -Uri $url -OutFile $downloads[$url]
+    # Invoke-WebRequest -Uri $url -OutFile $downloads[$url]
+    curl.exe -L $url -o $downloads[$url]
 }
 
 cd C:\installer
@@ -41,7 +42,8 @@ reg import "C:/installer/ZoomMeetingsGlobalPolicySuperbank.reg"
 # INSTALL CISCO SECURE ENDPOINT PROTECTION
 #====================================================================================#
 Write-Output "CISCO SECURE ENDPOINT PROTECTION"
-(New-Object System.Net.WebClient).DownloadFile("https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/amp_Protect.exe", "$env:TEMP/amp_Protect.exe")
+# (New-Object System.Net.WebClient).DownloadFile("https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/amp_Protect.exe", "$env:TEMP/amp_Protect.exe")
+curl.exe -L "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/amp_Protect.exe" -o "$env:TEMP/amp_Protect.exe"
 function CiscoSecureEndpoint {
 Start-Process -FilePath "$env:TEMP\amp_Protect.exe" -ArgumentList '/R /S'
 }
@@ -49,16 +51,19 @@ CiscoSecureEndpoint
 Start-Sleep 30
 
 # Install Qualys Cloud Agent
-(New-Object System.Net.WebClient).DownloadFile("https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/QualysCloudAgent.exe", "$env:TEMP/QualysCloudAgent.exe")
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+curl.exe -L "https://idbank-cen-corp-it-files.s3.ap-southeast-3.amazonaws.com/wininstaller/QualysCloudAgent.exe" -o "$env:TEMP\QualysCloudAgent.exe"
 $arguments = "CustomerId={5e178b8d-acec-d296-8055-4a60ceddc5fd} ActivationId={dc068396-6b29-4876-9ac3-9130be06350f} WebServiceUri=https://qagpublic.qg1.apps.qualys.in/CloudAgent/"
+
 function InstallQualysAgent {
-Start-Process -FilePath "$env:TEMP\qualysCloudAgent.exe" -ArgumentList $arguments -passthru
+    Start-Process -FilePath "$env:TEMP\QualysCloudAgent.exe" -ArgumentList $arguments
 }
+
 InstallQualysAgent
-Start-Sleep 10
 
 # Install JumpCloud agent
-Invoke-RestMethod -Uri "https://raw.githubusercontent.com/TheJumpCloud/support/master/scripts/windows/InstallWindowsAgent.ps1" -OutFile "$env:temp\InstallWindowsAgent.ps1"
+# Invoke-RestMethod -Uri "https://raw.githubusercontent.com/TheJumpCloud/support/master/scripts/windows/InstallWindowsAgent.ps1" -OutFile "$env:temp\InstallWindowsAgent.ps1"
+curl.exe -L "https://raw.githubusercontent.com/TheJumpCloud/support/master/scripts/windows/InstallWindowsAgent.ps1" -o "$env:temp\InstallWindowsAgent.ps1"
 & "$env:temp\InstallWindowsAgent.ps1" -JumpCloudConnectKey "5ede3dd0e94e49f715ca4ba4074b2849f95edf1c"
 Start-Sleep 15
 # Prompt for completion
