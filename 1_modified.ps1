@@ -2,7 +2,7 @@
 Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy Bypass -Force
 Set-ExecutionPolicy -Scope LocalMachine -ExecutionPolicy RemoteSigned -Force
 # Install necessary modules
-$modules = @("AuditPolicyDsc", "SecurityPolicyDsc", "PSDesiredStateConfiguration")
+$modules = @("AuditPolicyDsc", "SecurityPolicyDsc", "PSDesiredStateConfiguration", "DellBIOSProvider")
 foreach ($module in $modules) {
     Install-Module -Name $module -Force -Verbose
 }
