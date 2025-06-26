@@ -3988,5 +3988,26 @@ Get-ChildItem "$env:WinDir\WinSxS\*onedrive*" | ForEach-Object {
     Remove-Item -Recurse -Force $_.FullName
 }
 Uninstall-Package -Name "Windows PC Health Check"
+
+# reject install via ms-store
+
+# OPTION 1
+$regPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx"
+New-Item -Path $regPath -Force | Out-Null
+Set-ItemProperty -Path $regPath -Name "BlockNonAdminUserInstall" -Type DWord -Value 1
+Write-Output ">> BlockNonAdminUserInstall = 1"
+
+# OPTION 2
+Set-ItemProperty -Path $regPath -Name "AllowAllTrustedApps" -Type DWord -Value 0
+Write-Output ">> AllowAllTrustedApps = 0"
+
+# OPTION 3
+$protocolPath = "HKLM:\SOFTWARE\Classes\ms-appinstaller"
+Remove-Item -Path $protocolPath -Recurse -Force -ErrorAction SilentlyContinue
+Write-Output ">> ms-appinstaller protocol dihapus"
+
+Write-Output "`n>> Sadayana setelan geus diterapkeun. Restart mun perlu."
+
+
 Read-Host -Prompt "Apps Installed Bosque! Press any key to RESTART"
 Restart-Computer
