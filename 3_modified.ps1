@@ -114,7 +114,7 @@ Read-Host -Prompt "Apps Installed! Press any key to continue"
 # FORCEPOINT INSTALLER
 #====================================================================================#
 Write-Output "WAITING IF ANY DELAYED PROCESS"
-Start-Sleep 30
+Start-Sleep 5
 
 # Daftar file yang akan diunduh
 $urls = @(
@@ -132,134 +132,6 @@ foreach ($item in $urls) {
 Write-Output "INSTALLING FORCEPOINT..."
 Start-Process -FilePath "C:/Windows/TEMP/autoinstall.bat" -Verb runAs
 Start-Sleep -Seconds 5
-
-
-# Install dotnet core runtime 8.0.11
-# Variables
-$installerUrl = "https://download.visualstudio.microsoft.com/download/pr/53e9e41c-b362-4598-9985-45f989518016/53c5e1919ba2fe23273f2abaff65595b/dotnet-runtime-8.0.11-win-x64.exe"
-$localPath = "C:\temp\dotnet-runtime-8.0.11-win-x64.exe"
-$requiredRuntimeVersion = "8.0.11"
-
-# Function to Check Installed Runtimes
-function Check-DotNetRuntime {
-    $runtimes = &dotnet --list-runtimes 2>$null
-    return $runtimes -match "Microsoft\.AspNetCore\.App\s+$requiredRuntimeVersion" -or 
-           $runtimes -match "Microsoft\.NETCore\.App\s+$requiredRuntimeVersion"
-}
-
-# Check if .NET Runtime 8.0.11 is installed
-if (Check-DotNetRuntime) {
-    Write-Output "Already installed"
-} else {
-    # Ensure the directory exists
-    if (-not (Test-Path -Path (Split-Path $localPath))) {
-        New-Item -ItemType Directory -Path (Split-Path $localPath) -Force
-    }
-
-    # Download the installer
-    Invoke-WebRequest -Uri $installerUrl -OutFile $localPath
-
-    # Run the installer silently
-    Start-Process -FilePath $localPath -ArgumentList "/quiet", "/norestart" -Wait
-
-    # Verify installation
-    if (Check-DotNetRuntime) {
-        Write-Output "Installed .NET Runtime 8.0.11"
-    } else {
-        Write-Output "Installation failed. Please check the logs."
-    }
-}
-
-# Remove other dotnet version except 8.0.11
-# Variables
-$msiUrl = "https://github.com/dotnet/cli-lab/releases/download/1.7.550802/dotnet-core-uninstall-1.7.550802.msi"
-$localMsiPath = "C:\temp\dotnet-core-uninstall.msi"
-$uninstallToolPath = "C:\Program Files (x86)\dotnet-core-uninstall\dotnet-core-uninstall.exe"
-$requiredVersion = "8.0.11"
-$foldersToClean = @(
-    "C:\Program Files\dotnet\shared\Microsoft.NETCore.App",
-    "C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App"
-)
-
-# Function to Compare Versions
-function Compare-Version {
-    param (
-        [string]$versionA,
-        [string]$versionB
-    )
-    return ([version]$versionA -ge [version]$versionB)  # True if versionA is >= versionB
-}
-
-# Function to Check if .NET Runtime 8.0.11 or above is Installed
-function Check-DotNetRuntime {
-    $runtimes = &dotnet --list-runtimes 2>$null
-    $installedVersions = $runtimes | Select-String -Pattern "Microsoft\.(AspNetCore|NETCore)\.App\s+(\d+\.\d+\.\d+)" | ForEach-Object {
-        $_ -match "(\d+\.\d+\.\d+)"
-        $matches[1]
-    }
-
-    # Check if at least one installed version is >= 8.0.11
-    foreach ($version in $installedVersions) {
-        if (Compare-Version -versionA $version -versionB $requiredVersion) {
-            return $true
-        }
-    }
-    return $false
-}
-
-# Step 1: Check if .NET Runtime 8.0.11 or above is Installed
-if (Check-DotNetRuntime) {
-    Write-Output ".NET Runtime $requiredVersion or above is installed. Proceeding with cleanup..."
-    
-    # Step 2: Install the .NET Core Uninstall Tool if Not Already Installed
-    if (-not (Test-Path $uninstallToolPath)) {
-        if (-not (Test-Path -Path (Split-Path $localMsiPath))) {
-            New-Item -ItemType Directory -Path (Split-Path $localMsiPath) -Force
-        }
-        Invoke-WebRequest -Uri $msiUrl -OutFile $localMsiPath
-        Start-Process msiexec.exe -ArgumentList "/i", $localMsiPath, "/quiet", "/norestart" -Wait
-    }
-
-    # Step 3: Use Uninstall Tool to Remove Older Versions Only
-    $installedRuntimes = & $uninstallToolPath list --runtime
-    $runtimesToRemove = $installedRuntimes | Select-String -Pattern "\d+\.\d+\.\d+" | ForEach-Object {
-        $_ -match "(\d+\.\d+\.\d+)"
-        $version = $matches[1]
-        if (-not (Compare-Version -versionA $version -versionB $requiredVersion)) {
-            $version  # Remove only if it's older than 8.0.11
-        }
-    }
-    foreach ($version in $runtimesToRemove) {
-        & $uninstallToolPath remove --runtime $version --yes
-    }
-
-    # Step 4: Force Remove Leftover Directories
-    function Remove-With-Ownership {
-        param (
-            [string]$path
-        )
-        # Take ownership of the folder
-        takeown.exe /F $path /A /R /D Y
-        # Grant full control to Administrators
-        icacls.exe $path /grant Administrators:F /T
-        # Remove the folder
-        Remove-Item -Recurse -Force $path
-        Write-Output "Forcefully deleted folder: $path"
-    }
-    foreach ($folder in $foldersToClean) {
-        if (Test-Path $folder) {
-            Get-ChildItem -Path $folder -Directory | Where-Object { -not (Compare-Version -versionA $_.Name -versionB $requiredVersion) } | ForEach-Object {
-                Remove-With-Ownership -path $_.FullName
-            }
-        } else {
-            Write-Output "Folder not found: $folder"
-        }
-    }
-
-    Write-Output "Removed runtimes: $runtimesToRemove"
-} else {
-    Write-Output ".NET Runtime $requiredVersion or above is NOT installed. Skipping deletion process."
-}
 
 # Disable IPv6
 # Get all network adapters
