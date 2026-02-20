@@ -1,10 +1,10 @@
-# --- BAGIAN 1: KONFIGURASI PASSWORD & AUDIT ---
+# --- BAGIAN 1: PASSWORD & AUDIT ---
 
-# Tentukan path untuk file konfigurasi sementara
+# Path file konfigurasi
 $configFile = "$env:TEMP\fix_security_bank_std.inf"
 $dbFile = "$env:TEMP\security_db.sdb"
 
-# Isi konfigurasi disesuaikan SAMA PERSIS dengan temuan audit
+# Temuan Audit
 $infContent = @"
 [Unicode]
 Unicode=yes
@@ -27,7 +27,7 @@ PasswordComplexity = 1
 ClearTextPassword = 0
 
 [Event Audit]
-; 3 = Success and Failure (Mencatat berhasil & gagal)
+; 3 = Success and Failure (Record berhasil & gagal)
 ; Audit system events
 AuditSystemEvents = 3
 ; Audit logon events
@@ -36,34 +36,23 @@ AuditLogonEvents = 3
 AuditAccountLogon = 3
 "@
 
-# Tulis konfigurasi ke file .inf
 Set-Content -Path $configFile -Value $infContent -Encoding Unicode
-Write-Host "[1/2] Menerapkan Kebijakan Password & Audit..."
-
-# Jalankan secedit
+Write-Host "[1/2] Applying Password & Audit Policy..."
 secedit /configure /db $dbFile /cfg $configFile /areas SECURITYPOLICY
 
-# Hapus file sementara
+
 Remove-Item $configFile -Force
 Remove-Item $dbFile -Force
 
 # --- BAGIAN 2: SINKRONISASI WAKTU ---
 
-Write-Host "`n[2/2] Mengatur Sinkronisasi Waktu (NTP Indonesia Pool)..."
+Write-Host "`n[2/2] Sync Time ke NTP Server..."
 
 # NTP VM 10.21.16.124 (PRD)
 $NTPServers = "10.21.16.124"
-
-# Stop service waktu sebentar
 Stop-Service w32time
-
-# Set NTP server list dan set ke manual sync
 w32tm /config /syncfromflags:manual /manualpeerlist:"$NTPServers" /reliable:YES
-
-# Start service lagi
 Start-Service w32time
-
-# Paksa update waktu sekarang juga
 w32tm /config /update
 w32tm /resync
 
