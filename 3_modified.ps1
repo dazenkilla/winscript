@@ -74,7 +74,6 @@ foreach ($msi in $msiFiles.Keys) {
 
 # Move user.bat to startup folder
 Move-Item -Path "C:\installer\user.bat" -Destination "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\"
-Move-Item -Path "C:\installer\run.ps1" -Destination "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\"
 
 # Import Zoom global policy registry
 reg import "C:/installer/ZoomMeetingsGlobalPolicySuperbank.reg"
@@ -148,3 +147,4 @@ Remove-Item -Path "C:\installer" -Recurse -Force
 # Clean up Downloads folder
 $downloadsPath = "~\Downloads\"
 Get-ChildItem $downloadsPath | Remove-Item -Recurse -Force
+
