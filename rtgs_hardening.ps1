@@ -40,7 +40,6 @@ Set-Content -Path $configFile -Value $infContent -Encoding Unicode
 Write-Host "[1/2] Applying Password & Audit Policy..."
 secedit /configure /db $dbFile /cfg $configFile /areas SECURITYPOLICY
 
-
 Remove-Item $configFile -Force
 Remove-Item $dbFile -Force
 
@@ -50,8 +49,14 @@ Write-Host "`n[2/2] Sync Time ke NTP Server..."
 
 # NTP VM 10.21.16.124 (PRD)
 $NTPServers = "10.21.16.124"
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DateTime\Servers"
+
+Set-ItemProperty -Path $RegPath -Name "1" -Value $NTPServers
+Set-ItemProperty -Path $RegPath -Name "(Default)" -Value "1"
+
 Stop-Service w32time
 w32tm /config /syncfromflags:manual /manualpeerlist:"$NTPServers" /reliable:YES
+
 Start-Service w32time
 w32tm /config /update
 w32tm /resync
